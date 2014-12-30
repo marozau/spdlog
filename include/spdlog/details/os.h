@@ -122,8 +122,8 @@ constexpr inline unsigned short eol_size()
 inline int fopen_s(FILE** fp, const std::string& filename, const char* mode)
 {
 #ifdef _WIN32
-    *fp = _fsopen((filename.c_str()), mode, _SH_DENYWR);
-    return *fp == nullptr;
+	*fp = ::_fsopen( filename.c_str(), mode, _SH_DENYNO );
+	return *fp == nullptr;
 #else
     *fp = fopen((filename.c_str()), mode);
     return *fp == nullptr;
@@ -136,13 +136,17 @@ inline int fopen_s(FILE** fp, const std::string& filename, const char* mode)
 inline int utc_minutes_offset(const std::tm& tm = details::os::localtime())
 {
 
-#ifdef _WIN32
-    (void)tm; // avoid unused param warning
-    DYNAMIC_TIME_ZONE_INFORMATION tzinfo;
+#ifdef _WIN32    
+#if (_WIN32_WINNT >= 0x0600)
+	( void )tm; // avoid unused param warning
+	DYNAMIC_TIME_ZONE_INFORMATION tzinfo;
     auto rv = GetDynamicTimeZoneInformation(&tzinfo);
-    if (!rv)
-        return -1;
-    return -1 * (tzinfo.Bias + tzinfo.DaylightBias);
+	if ( !rv )
+		return -1;
+	return -1 * (tzinfo.Bias + tzinfo.DaylightBias);
+#else
+	return -1;
+#endif    
 #else
     return static_cast<int>(tm.tm_gmtoff / 60);
 #endif

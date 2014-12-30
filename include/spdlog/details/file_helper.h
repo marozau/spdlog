@@ -46,7 +46,7 @@ class file_helper
 {
 public:
     const int open_tries = 5;
-    const int open_interval = 10;
+    const int open_interval = 1;
 
     explicit file_helper(bool auto_flush):
         _fd(nullptr),
@@ -73,7 +73,7 @@ public:
             if(!os::fopen_s(&_fd, fname, mode))
                 return;
 
-            std::this_thread::sleep_for(std::chrono::milliseconds(open_interval));
+            //std::this_thread::sleep_for(std::chrono::seconds(open_interval));
         }
 
         throw spdlog_ex("Failed opening file " + fname + " for writing");
